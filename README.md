@@ -12,3 +12,5 @@ if you want to create prebuild-layout(builde on top of SiteOrigin widget bundle)
 - Download prebuild layout from SiteOrigin editor in your wordpress admin page. The downloaded file extension sould be `.json`
 - capture rendered screen in frontend and name it `screenshot`. The file extension can be any format like `jpg` or `png`
 - Put the two files into a folder and name that folder to anything you want, `Front Page` etc., this folder name will be used to show as your prebuild-layout name
+- Move that folder to `layouts` folder, our framework will activate your layouts automatically.
+- That's it!!! havae fun :)
