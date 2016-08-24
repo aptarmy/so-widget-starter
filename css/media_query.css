@@ -1,0 +1,27 @@
+/* from bootstrap line 6693 to 6712 */
+@media (max-width: 780px) {
+  .hidden_xs {
+    display: none !important;
+  }
+}
+@media (min-width: 781px) and (max-width: 991px) {
+  .hidden_sm {
+    display: none !important;
+  }
+}
+@media (min-width: 992px) and (max-width: 1199px) {
+  .hidden_md {
+    display: none !important;
+  }
+}
+@media (min-width: 1200px) {
+  .hidden_lg {
+    display: none !important;
+  }
+}
+
+
+/*siteorigin override*/
+.panel-grid-cell {
+  min-height: 0px !important;
+}
