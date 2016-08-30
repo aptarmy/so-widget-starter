@@ -4,8 +4,12 @@ APT widget framework based on SiteOrigin-widget-bundle which adds responsive and
 ## How to use this framework ?
 - First file in root directory can be leave untouched. Change file name and root directory name if necessary.
 - Change widget folder name and main php file name(under the widget folder) if necessary
-- It's imperative that your widget class extends `APT_Widget` class
-- Make sure that you append this code `$this->get_media_query_id() => $this->get_media_query_options()` to `$form_options` array. it will add responsive functionality to your newly creative widget automatically.
+- It's imperative that your widget class extends `APT_Widget` class.
+
+### Optional functionalities
+Please note that these options are only available if a widget is inserted in either **Page Builder** editor or **widget page**.
+-  If you want to give users ability to control responsive functionality of widget, append this code `$this->get_media_query_id() => $this->get_media_query_options()` to `$form_options` array. it will add responsive functionality to your newly creative widget automatically.
+- If you want to give users ability to float widget in **Pagebuilder**, append this code `$this->get_float_id() => $this->get_float_options()` to `$form_options` array.
 
 ## Create prebuild-layout
 if you want to create prebuild-layout(builde on top of SiteOrigin widget bundle), it's very simple. Please follow these steps.
