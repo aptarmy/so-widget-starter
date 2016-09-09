@@ -1,19 +1,16 @@
 <?php
-
+/*
+Plugin Name: test blueprint
+Description: just for testing
+Version: 0.0.1
+Author: Arm
+License: GPLv2 or later
+*/
 /**
  * Actvie all theme-defined widgets
  */
 function apt_widgets_active_widgets($active_widgets) {
-	$active_widgets['apt_accordion_menu'] = true;
-	$active_widgets['apt_big_post_banner'] = true;
-	$active_widgets['apt_main_menu'] = true;
-	$active_widgets['apt_mmenu'] = true;
-	$active_widgets['apt_posts_thumbnail'] = true;
-	$active_widgets['apt_running_text'] = true;
-	$active_widgets['apt_search'] = true;
-	$active_widgets['apt_site_branding'] = true;
-	$active_widgets['apt_wc_cart_icon'] = true;
-	$active_widgets['apt_wood_menu'] = true;
+	$active_widgets['apt_blueprint'] = true;
 	return $active_widgets;
 }
 add_filter('siteorigin_widgets_active_widgets', 'apt_widgets_active_widgets');
@@ -32,6 +29,25 @@ require_once ABSPATH . 'wp-admin/includes/file.php';
 if( !WP_Filesystem() ) {
 	return;
 }
+
+/**
+ * theme dir url
+ */
+if ( !function_exists("theme_dir_url") ) :
+	function theme_dir_url($file) {
+		$theme_dir_url = "";
+		if (is_string($file) && $file !== "") {
+			// $file /home/apt/public/wp/wp-content/theme/seed/inc/some-folder/some-file.php
+			$dirname = wp_normalize_path(trailingslashit(dirname($file))); // /home/apt/public/wp/wp-content/theme/seed/inc/some-folder/
+			$template_path = wp_normalize_path(get_template_directory()); // /home/apt/public/wp/wp-content/theme/seed
+			$template_uri = get_template_directory_uri(); // http://www.example.com/wp-content/theme/seed
+			$theme_dir_url = str_replace($template_path, '', $dirname); // /inc/some-folder/
+			$theme_dir_url = $template_uri . $theme_dir_url; // http://www.example.com/wp-content/theme/seed/inc/some-folder/
+			$theme_dir_url = set_url_scheme($theme_dir_url);
+		}
+		return $theme_dir_url;
+	}
+endif;
 
 /**
  * Automatically adding prerbuild layout to siteorigin editor. All layout folders should be stored in 'layouts' folder
@@ -91,8 +107,6 @@ function apt_widget_init() {
 	}
 
 	abstract class APT_Widget extends SiteOrigin_Widget {
-
-		public $widget_id;
 
 		public static $media_query_section_id = 'media_query_section';
 		public static $float_section_id = 'float_section';

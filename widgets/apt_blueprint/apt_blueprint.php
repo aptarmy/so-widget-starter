@@ -48,6 +48,7 @@ class APT_Blueprint extends APT_Widget {
 					'label' => __('description.', 'textdomain'),
 					'default' => 'default text'
 				),
+				$this->get_float_id() => $this->get_float_options(),
 				$this->get_media_query_id() => $this->get_media_query_options(),
 			),
 

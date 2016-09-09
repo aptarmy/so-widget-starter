@@ -20,8 +20,18 @@
   }
 }
 
+.float_right {
+  float: right;
+}
+.float_left {
+  float: left;
+}
+.float_none {
+  float: none;
+}
 
 /*siteorigin override*/
+/*fix error*/
 .panel-grid-cell {
   min-height: 0px !important;
 }
