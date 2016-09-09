@@ -1,12 +1,22 @@
 <?php
-/*
-Plugin Name: My Test Plugin
-Plugin URL: http://google.com
-Description: This widget will be shown on Site Origin admin page
-Author: Pakpoom Tiwaakornkit
-Version: 0.1
-Author URL: http://google.com
-*/
+
+/**
+ * Actvie all theme-defined widgets
+ */
+function apt_widgets_active_widgets($active_widgets) {
+	$active_widgets['apt_accordion_menu'] = true;
+	$active_widgets['apt_big_post_banner'] = true;
+	$active_widgets['apt_main_menu'] = true;
+	$active_widgets['apt_mmenu'] = true;
+	$active_widgets['apt_posts_thumbnail'] = true;
+	$active_widgets['apt_running_text'] = true;
+	$active_widgets['apt_search'] = true;
+	$active_widgets['apt_site_branding'] = true;
+	$active_widgets['apt_wc_cart_icon'] = true;
+	$active_widgets['apt_wood_menu'] = true;
+	return $active_widgets;
+}
+add_filter('siteorigin_widgets_active_widgets', 'apt_widgets_active_widgets');
 
 /**
  * Tell Siteorigin where widgets folder is stored
@@ -17,6 +27,12 @@ function apt_add_widgets_collection($folders){
 }
 add_filter('siteorigin_widgets_widget_folders', 'apt_add_widgets_collection');
 
+// Setup wp_filesystem api
+require_once ABSPATH . 'wp-admin/includes/file.php';
+if( !WP_Filesystem() ) {
+	return;
+}
+
 /**
  * Automatically adding prerbuild layout to siteorigin editor. All layout folders should be stored in 'layouts' folder
  * In 'layouts' folder, A layout folder should be structured like this.
@@ -24,10 +40,10 @@ add_filter('siteorigin_widgets_widget_folders', 'apt_add_widgets_collection');
  * 		|
  *   	+---- [any-file-name.json] This file should look like this.
  *  	|  		{
-		|	        'widgets' : [...],
-		|	        'grids' : [...],
-		|	        'grid_cells' : [...],
-		|        }
+ *		|	        'widgets' : [...],
+ *		|	        'grids' : [...],
+ *		|	        'grid_cells' : [...],
+ *		|        }
  *  	+---- [screenshot.png|jpg|gif] This image file should be named screenshot. The file extension can be any format like .jpg .png etc.
  *  		
  */
@@ -40,14 +56,14 @@ function apt_prebuild_layout($layouts) {
 		if(!($folder == '.' || $folder == '..')) {
 			
 			$current_path = plugin_dir_path( __FILE__ ) . 'layouts/' . $folder . '/';
-			$current_url =  plugin_dir_url( __FILE__ ) . 'layouts/' . $folder . '/';
+			$current_url =  theme_dir_url( __FILE__ ) . 'layouts/' . $folder . '/';
 			
 			$matches = glob($current_path . '*.json');
 			$json_file_path = $matches[0];
 			$matches = glob($current_path . 'screenshot.*');
-			$screenshot_file_url = plugin_dir_url($matches[0]) . basename($matches[0]);
+			$screenshot_file_url = theme_dir_url($matches[0]) . basename($matches[0]);
 
-			$json_file_content = file_get_contents($json_file_path);
+			$json_file_content = $GLOBALS['wp_filesystem']->get_contents($json_file_path);
 			$so_prebuild_layout = json_decode($json_file_content, true);
 			
 			$so_prebuild_layout['screenshot'] = $screenshot_file_url;
@@ -65,31 +81,42 @@ add_filter('siteorigin_panels_prebuilt_layouts','apt_prebuild_layout');
  */
 function apt_widget_init() {
 
+	/**
+	 * As this class depends on Siteorigin widget bundle
+	 * wew have to check if users have already installed Siteorigin widget bundle
+	 * before we do the other thing
+	 */
+	if (!class_exists('SiteOrigin_Widget')) {
+		return;
+	}
+
 	abstract class APT_Widget extends SiteOrigin_Widget {
-		
-		public $instance;
+
 		public $widget_id;
 
-		public static $media_query_section_id = 'media_query';
-		public static $float_section_id = 'float';
+		public static $media_query_section_id = 'media_query_section';
+		public static $float_section_id = 'float_section';
+		public static $float_id = 'float';
 
 		public function widget($args, $instance) {
 			parent::widget($args, $instance);
-			if ($args['widget_id'] == "") { return false; }
-			$this->instance = $instance;
-			$this->widget_id = $args['widget_id'];
-			?>
-			<script>
-				jQuery("<?php echo $this->get_jquery_selector(); ?>")
-					.addClass("<?php echo $this->get_media_query_css_class(); ?>")
-					.css({"float": "<?php echo $instance[self::$float_section_id]; ?>"});
-			</script>
-			<?php
+			$this->add_widget_classes($instance);
 		}
-		private function get_jquery_selector() {
-			$wp_widget = $this->widget_id;
-			$so_widget = str_replace('widget-', '', $this->widget_id);
-			return '#' . $wp_widget . ', .so-panel[id$=' . $so_widget . ']';
+		function add_widget_classes($instance) {
+			?>
+				<script type="text/javascript">
+					(function($){
+						var $current_widget = $(".so-widget-<?php echo $this->id_base; ?>:last");
+						$current_widget_wrapper = $current_widget.parent();
+						<?php if(trim( $this->get_media_query_css_class($instance) ) ) : ?>
+							$current_widget_wrapper.addClass("<?php echo $this->get_media_query_css_class($instance); ?>");
+						<?php endif; ?>
+						<?php if( $this->get_float_class($instance) ) : ?>
+							$current_widget_wrapper.addClass("<?php echo $this->get_float_class($instance); ?>");
+						<?php endif; ?>
+					})(jQuery);
+				</script>
+			<?php
 		}
 
 		//
@@ -128,10 +155,10 @@ function apt_widget_init() {
 		protected function get_media_query_id() {
 			return self::$media_query_section_id;
 		}
-		private function get_media_query_css_class() {
+		private function get_media_query_css_class($instance) {
 			$css_class_string = '';
-			if(isset($this->instance[self::$media_query_section_id])) {
-				foreach ($this->instance[self::$media_query_section_id] as $css_class => $value) {
+			if(isset($instance[self::$media_query_section_id])) {
+				foreach ($instance[self::$media_query_section_id] as $css_class => $value) {
 					if($value && ($css_class !== 'so_field_container_state')) {
 						$css_class_string .= $css_class . ' ';
 					}
@@ -147,23 +174,30 @@ function apt_widget_init() {
 		// 
 		protected function get_float_options() {
 			$float_options = array(
-				self::$float_section_id => array(
-			        'type' => 'radio',
-			        'label' => __( 'Float this widget', 'textdomain' ),
-			        'default' => 'none',
-			        'options' => array(
-			            'none' => __( 'None', 'textdomain' ),
-			            'left' => __( 'Left', 'textdomain' ),
-			            'right' => __( 'Right', 'textdomain' )
-			        )
-			    )
+				'type' => 'section',
+				'label' => __( 'Float this widget', 'textdomain' ),
+				'hide' => true,
+				'fields' => array(
+					self::$float_id => array (
+						'type' => 'radio',
+						'default' => 'float_none',
+						'options' => array(
+							'float_none' => __( 'None', 'textdomain' ),
+							'float_left' => __( 'Left', 'textdomain' ),
+							'float_right' => __( 'Right', 'textdomain' )
+						)
+					)
+				)
 			);
-			return $float_options[self::$float_section_id];
+			return $float_options;
 		}
 		protected function get_float_id() {
 			return self::$float_section_id;
 		}
-
+		private function get_float_class($instance) {
+			$float_class = isset ($instance[self::$float_section_id][self::$float_id]) ? $instance[self::$float_section_id][self::$float_id] : '';
+			return $float_class;
+		}
 	}
 
 	/**
@@ -205,9 +239,9 @@ function apt_widget_init() {
 		}
 	}
 }
-add_action('plugins_loaded', 'apt_widget_init');
+add_action('after_setup_theme', 'apt_widget_init', 10);
 
 function apt_widget_enqueue_script() {
-	wp_enqueue_style( 'apt_widget_media_querey', plugin_dir_url(__FILE__) . 'css/media_query.css' );
+	wp_enqueue_style( 'apt_widget', theme_dir_url(__FILE__) . 'css/apt_widget.css' );
 }
 add_action('wp_enqueue_scripts', 'apt_widget_enqueue_script');
