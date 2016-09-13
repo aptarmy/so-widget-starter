@@ -30,6 +30,7 @@ class APT_Blueprint extends APT_Widget {
 			array(
 				'description' => __('This widget is intended to be overrided', 'textdomain'),
 				'help'        => 'http://example.com/hello-world-widget-docs',
+				'panels_groups' => array('apt_widgets'),
 			),
 
 			//The $control_options array, which is passed through to WP_Widget

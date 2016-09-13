@@ -16,6 +16,20 @@ function apt_widgets_active_widgets($active_widgets) {
 add_filter('siteorigin_widgets_active_widgets', 'apt_widgets_active_widgets');
 
 /**
+ * Add new widget grouop in widget dialog
+ */
+function apt_add_widget_tabs($tabs) {
+    $tabs[] = array(
+        'title' => __('Theme\'s widgets', 'seed'),
+        'filter' => array(
+            'groups' => array('apt_widgets')
+        )
+    );
+    return $tabs;
+}
+add_filter('siteorigin_panels_widget_dialog_tabs', 'apt_add_widget_tabs', 20);
+
+/**
  * Tell Siteorigin where widgets folder is stored
  */
 function apt_add_widgets_collection($folders){
