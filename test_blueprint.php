@@ -135,7 +135,7 @@ function apt_widget_init() {
 				<script type="text/javascript">
 					(function($){
 						var $current_widget = $(".so-widget-<?php echo $this->id_base; ?>:last");
-						$current_widget_wrapper = $current_widget.parent();
+						$current_widget_wrapper = $current_widget.closest(".so-panel, .widget");
 						<?php if(trim( $this->get_media_query_css_class($instance) ) ) : ?>
 							$current_widget_wrapper.addClass("<?php echo $this->get_media_query_css_class($instance); ?>");
 						<?php endif; ?>
