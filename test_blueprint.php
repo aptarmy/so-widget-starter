@@ -107,6 +107,15 @@ function apt_prebuild_layout($layouts) {
 add_filter('siteorigin_panels_prebuilt_layouts','apt_prebuild_layout');
 
 /**
+ * Fix Siteorigin import layout error
+ */
+add_filter('siteorigin_panels_css_row_margin_bottom', 'apt_siteorigin_panels_css_row_margin_bottom', 5);
+function apt_siteorigin_panels_css_row_margin_bottom() {
+	return "0px";
+}
+
+
+/**
  * Add APT_Widget class
  */
 function apt_widget_init() {
