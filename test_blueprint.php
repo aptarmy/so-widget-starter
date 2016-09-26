@@ -10,7 +10,16 @@ License: GPLv2 or later
  * Actvie all theme-defined widgets
  */
 function apt_widgets_active_widgets($active_widgets) {
-	$active_widgets['apt_blueprint'] = true;
+	$active_widgets['apt_accordion_menu'] = true;
+	$active_widgets['apt_big_post_banner'] = true;
+	$active_widgets['apt_main_menu'] = true;
+	$active_widgets['apt_mmenu'] = true;
+	$active_widgets['apt_posts_thumbnail'] = true;
+	$active_widgets['apt_running_text'] = true;
+	$active_widgets['apt_search'] = true;
+	$active_widgets['apt_site_branding'] = true;
+	$active_widgets['apt_wc_cart_icon'] = true;
+	$active_widgets['apt_wood_menu'] = true;
 	return $active_widgets;
 }
 add_filter('siteorigin_widgets_active_widgets', 'apt_widgets_active_widgets');
@@ -20,11 +29,12 @@ add_filter('siteorigin_widgets_active_widgets', 'apt_widgets_active_widgets');
  */
 function apt_add_widget_tabs($tabs) {
     $tabs[] = array(
-        'title' => __('Theme\'s widgets', 'seed'),
+        'title' => __('Theme\'s widgets', 'aptnews'),
         'filter' => array(
             'groups' => array('apt_widgets')
         )
     );
+
     return $tabs;
 }
 add_filter('siteorigin_panels_widget_dialog_tabs', 'apt_add_widget_tabs', 20);
@@ -43,9 +53,8 @@ require_once ABSPATH . 'wp-admin/includes/file.php';
 if( !WP_Filesystem() ) {
 	return;
 }
-
 /**
- * theme dir url
+ * it works the samwe way as plugin_dir_url but it's intended to be used in theme
  */
 if ( !function_exists("theme_dir_url") ) :
 	function theme_dir_url($file) {
@@ -62,7 +71,6 @@ if ( !function_exists("theme_dir_url") ) :
 		return $theme_dir_url;
 	}
 endif;
-
 /**
  * Automatically adding prerbuild layout to siteorigin editor. All layout folders should be stored in 'layouts' folder
  * In 'layouts' folder, A layout folder should be structured like this.
@@ -70,10 +78,10 @@ endif;
  * 		|
  *   	+---- [any-file-name.json] This file should look like this.
  *  	|  		{
- *		|	        'widgets' : [...],
- *		|	        'grids' : [...],
- *		|	        'grid_cells' : [...],
- *		|        }
+		|	        'widgets' : [...],
+		|	        'grids' : [...],
+		|	        'grid_cells' : [...],
+		|        }
  *  	+---- [screenshot.png|jpg|gif] This image file should be named screenshot. The file extension can be any format like .jpg .png etc.
  *  		
  */
@@ -114,7 +122,6 @@ function apt_siteorigin_panels_css_row_margin_bottom() {
 	return "0px";
 }
 
-
 /**
  * Add APT_Widget class
  */
@@ -130,6 +137,8 @@ function apt_widget_init() {
 	}
 
 	abstract class APT_Widget extends SiteOrigin_Widget {
+
+		public $widget_id;
 
 		public static $media_query_section_id = 'media_query_section';
 		public static $float_section_id = 'float_section';
@@ -165,24 +174,24 @@ function apt_widget_init() {
 			$media_query = array(
 				self::$media_query_section_id => array(
 					'type' => 'section',
-					'label' => __( 'Hide your widget on specified screen width.' , 'textdomain' ),
+					'label' => __( 'Hide your widget on specified screen width.' , 'aptnews' ),
 					'hide' => true,
 					'fields' => array(
 						'hidden_xs' => array(
 							'type' => 'checkbox',
-							'label' => __( 'Hide this widget on screen width < 781px', 'textdomain' )
+							'label' => __( 'Hide this widget on screen width < 781px', 'aptnews' )
 						),
 						'hidden_sm' => array(
 							'type' => 'checkbox',
-							'label' => __( 'Hide this widget on screen width > 780px and < 992px', 'textdomain' )
+							'label' => __( 'Hide this widget on screen width > 780px and < 992px', 'aptnews' )
 						),
 						'hidden_md' => array(
 							'type' => 'checkbox',
-							'label' => __( 'Hide this widget on screen width > 991px and < 1200px', 'textdomain' )
+							'label' => __( 'Hide this widget on screen width > 991px and < 1200px', 'aptnews' )
 						),
 						'hidden_lg' => array(
 							'type' => 'checkbox',
-							'label' => __( 'Hide this widget on screen width > 1199', 'textdomain' )
+							'label' => __( 'Hide this widget on screen width > 1199', 'aptnews' )
 						),
 					),
 				)
@@ -212,16 +221,16 @@ function apt_widget_init() {
 		protected function get_float_options() {
 			$float_options = array(
 				'type' => 'section',
-				'label' => __( 'Float this widget', 'textdomain' ),
+				'label' => __( 'Float this widget', 'aptnews' ),
 				'hide' => true,
 				'fields' => array(
 					self::$float_id => array (
 						'type' => 'radio',
 						'default' => 'float_none',
 						'options' => array(
-							'float_none' => __( 'None', 'textdomain' ),
-							'float_left' => __( 'Left', 'textdomain' ),
-							'float_right' => __( 'Right', 'textdomain' )
+							'float_none' => __( 'None', 'aptnews' ),
+							'float_left' => __( 'Left', 'aptnews' ),
+							'float_right' => __( 'Right', 'aptnews' )
 						)
 					)
 				)
@@ -248,7 +257,8 @@ function apt_widget_init() {
 		
 		'menu' => array(
 			'type' => 'select',
-			'label' => __('description.', 'textdomain'),
+			'label' => __('description.', 'aptnews'),
+			'default' => 'not_selected',
 			'options' => $this->get_all_menus()
 		)
 
@@ -257,6 +267,11 @@ function apt_widget_init() {
 		wp_nav_menu(array(
 			'menu' => $instance['menu']
 		));
+	
+	* to check if user select menu or not use this code
+		
+		if($instance['menu'] !== "not_selected") { ... }
+
 	* 
 	*/
 	abstract class APT_Widget_Menu extends APT_Widget {
@@ -269,6 +284,7 @@ function apt_widget_init() {
 			// Get all menus crerated by users
 			$all_menus_obj = get_terms( 'nav_menu', array( 'hide_empty' => true ) );
 			$all_menu = array();
+			$all_menu["not_selected"] = "-- Select Menu --";
 			foreach($all_menus_obj as $menu){
 				$all_menu[$menu->slug] = $menu->name;
 			}
