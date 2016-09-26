@@ -35,3 +35,9 @@
 .panel-grid-cell {
   min-height: 0px !important;
 }
+.so-panel {
+  margin-bottom: 0px !important;
+}
+.panel-grid-cell {
+  margin-bottom: 0px !important;
+}
