@@ -34,10 +34,8 @@
 /*fix error*/
 .panel-grid-cell {
   min-height: 0px !important;
-}
-.so-panel {
   margin-bottom: 0px !important;
 }
-.panel-grid-cell {
+.so-panel {
   margin-bottom: 0px !important;
 }
