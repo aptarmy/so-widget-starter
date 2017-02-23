@@ -10,16 +10,7 @@ License: GPLv2 or later
  * Actvie all theme-defined widgets
  */
 function apt_widgets_active_widgets($active_widgets) {
-	$active_widgets['apt_accordion_menu'] = true;
-	$active_widgets['apt_big_post_banner'] = true;
-	$active_widgets['apt_main_menu'] = true;
-	$active_widgets['apt_mmenu'] = true;
-	$active_widgets['apt_posts_thumbnail'] = true;
-	$active_widgets['apt_running_text'] = true;
-	$active_widgets['apt_search'] = true;
-	$active_widgets['apt_site_branding'] = true;
-	$active_widgets['apt_wc_cart_icon'] = true;
-	$active_widgets['apt_wood_menu'] = true;
+	$active_widgets["apt_blueprint"] = true;
 	return $active_widgets;
 }
 add_filter('siteorigin_widgets_active_widgets', 'apt_widgets_active_widgets');

@@ -41,13 +41,13 @@ class APT_Blueprint extends APT_Widget {
 			array(
 				'text' => array(
 					'type' => 'text',
-					'label' => __('description.', 'textdomain'),
+					'label' => __('text.', 'textdomain'),
 					'default' => 'default text'
 				),
 				'background_color' => array(
 					'type' => 'color',
-					'label' => __('description.', 'textdomain'),
-					'default' => 'default text'
+					'label' => __('background color.', 'textdomain'),
+					'default' => '#f1f1f1'
 				),
 				$this->get_float_id() => $this->get_float_options(),
 				$this->get_media_query_id() => $this->get_media_query_options(),
@@ -70,10 +70,21 @@ class APT_Blueprint extends APT_Widget {
 	
 	/* set less variable */
 	function get_less_variables($instance){
-		return array(
-			'background_color' => $instance['background_color'],
-		);
+		$less_vars = array();
+		if(isset($instance["background_color"])) $less_vars["background_color"] = $instance["background_color"];
+		return $less_vars;
 	}
 }
 // siteorigin_widget_register($desired_widget_id, $path_to_widget, $class_used_to_create_widget)
 siteorigin_widget_register('apt_blueprint', __FILE__, 'APT_Blueprint');
+
+/**
+ * Widget Image profile
+ */
+function apt_so_widget_blueprint_image_profile( $banner_url, $widget_meta ) {
+    if( $widget_meta['ID'] == 'apt_blueprint') {
+        $banner_url = theme_dir_url(__FILE__) . 'widget-image-profile.svg';
+    }
+    return $banner_url;
+}
+add_filter( 'siteorigin_widgets_widget_banner', 'apt_so_widget_blueprint_image_profile', 10, 2);
