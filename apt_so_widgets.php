@@ -303,57 +303,57 @@ function apt_widget_init() {
 			</div>
 		<?php } ?>
 	 */
-		
-    abstract class APT_Widget_Woocommerce extends APT_Widget
-    {
-		protected function get_woocommerce_posts_limit_key() {
-			return "woocommerce_posts_limit";
-		}
-		protected function get_woocommerce_posts_limit_value() {
-			return array(
-						'type' => 'number',
-						'label' => __('How many products to show', 'apt_widgets'),
-						'default' => '6'
+	if(class_exists('SiteOrigin_Widget')) :
+		abstract class APT_Widget_Woocommerce extends APT_Widget
+		{
+			protected function get_woocommerce_posts_limit_key() {
+				return "woocommerce_posts_limit";
+			}
+			protected function get_woocommerce_posts_limit_value() {
+				return array(
+							'type' => 'number',
+							'label' => __('How many products to show', 'apt_widgets'),
+							'default' => '6'
+						);
+			}
+			protected function get_woocommerce_posts_key() {
+				return "woocommerce_posts";
+			}
+			protected function get_woocommerce_posts_value() {
+				return array(
+							'type' => 'radio',
+							'label' => __( 'Filter Woocommerce Products', 'apt_widgets' ),
+							'default' => 'new',
+							'options' => array(
+								'new' => __( 'New Products', 'apt_widgets' ),
+								'featured' => __( 'Featuered Products', 'apt_widgets' ),
+								'best_seller' => __( 'Best Seller Products', 'apt_widgets' ),
+								'sale' => __( 'Sale Products', 'apt_widgets' ),
+								'custom' => __( 'Custom Products(by clicking button below)', 'apt_widgets' )
+							)
+						);
+			}
+			protected function get_siteorigin_posts_key() {
+				return "siteorigin_posts";
+			}
+			protected function get_siteorigin_posts_value() {
+				return array(
+						'type' => 'posts',
+						'label' => __('Custom Prodcuts', 'apt_widgets'),
+						'description' => __('If "Custom Products" is selected, this custom products will be used', 'apt_widgets')
 					);
-		}
-		protected function get_woocommerce_posts_key() {
-			return "woocommerce_posts";
-		}
-		protected function get_woocommerce_posts_value() {
-			return array(
-						'type' => 'radio',
-						'label' => __( 'Filter Woocommerce Products', 'apt_widgets' ),
-						'default' => 'new',
-						'options' => array(
-							'new' => __( 'New Products', 'apt_widgets' ),
-							'featured' => __( 'Featuered Products', 'apt_widgets' ),
-							'best_seller' => __( 'Best Seller Products', 'apt_widgets' ),
-							'sale' => __( 'Sale Products', 'apt_widgets' ),
-							'custom' => __( 'Custom Products(by clicking button below)', 'apt_widgets' )
-                    	)
-					);
-		}
-		protected function get_siteorigin_posts_key() {
-			return "siteorigin_posts";
-		}
-		protected function get_siteorigin_posts_value() {
-			return array(
-                    'type' => 'posts',
-                    'label' => __('Custom Prodcuts', 'apt_widgets'),
-                    'description' => __('If "Custom Products" is selected, this custom products will be used', 'apt_widgets')
-                );
-		}
-        protected function get_posts($instance)
-        {
-            // setup posts query
-            // if a user select from radio button
-            if (isset($instance["woocommerce_posts"]) && $instance["woocommerce_posts"] !== "custom") {
-                $posts_query = array();
-                $posts_query["post_type"] = "product";
-                $posts_query["posts_per_page"] = intval($instance["woocommerce_posts_limit"]);
-                // if a user select new products
-                if ($instance["woocommerce_posts"] === "new") {
-                    return new WP_Query($posts_query);
+			}
+			protected function get_posts($instance)
+			{
+				// setup posts query
+				// if a user select from radio button
+				if (isset($instance["woocommerce_posts"]) && $instance["woocommerce_posts"] !== "custom") {
+					$posts_query = array();
+					$posts_query["post_type"] = "product";
+					$posts_query["posts_per_page"] = intval($instance["woocommerce_posts_limit"]);
+					// if a user select new products
+					if ($instance["woocommerce_posts"] === "new") {
+						return new WP_Query($posts_query);
                 }
                 // if a user select featured products
                 if ($instance["woocommerce_posts"] === "featured") {
@@ -380,6 +380,7 @@ function apt_widget_init() {
             }
         }
     }
+	}
 }
 add_action('after_setup_theme', 'apt_widget_init', 10);
 
