@@ -30,6 +30,17 @@
   float: none;
 }
 
+/* notice message */
+.apt_notice {
+  background-color: #c51d1d;
+  color: #fff;
+  text-align: center;
+  padding: 1em;
+  width: 500px;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
 /*siteorigin override*/
 /*fix error*/
 .panel-grid-cell {

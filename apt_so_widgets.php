@@ -11,6 +11,7 @@ License: GPLv2 or later
  */
 function apt_widgets_active_widgets($active_widgets) {
 	$active_widgets["apt_blueprint"] = true;
+	$active_widgets["apt_woocommerce_posts_loop"] = true;
 	return $active_widgets;
 }
 add_filter('siteorigin_widgets_active_widgets', 'apt_widgets_active_widgets');
@@ -19,14 +20,14 @@ add_filter('siteorigin_widgets_active_widgets', 'apt_widgets_active_widgets');
  * Add new widget grouop in widget dialog
  */
 function apt_add_widget_tabs($tabs) {
-    $tabs[] = array(
-        'title' => __('Theme\'s widgets', 'aptnews'),
-        'filter' => array(
-            'groups' => array('apt_widgets')
-        )
-    );
+	$tabs[] = array(
+		'title' => __('Theme\'s widgets', 'aptnews'),
+		'filter' => array(
+			'groups' => array('apt_widgets')
+		)
+	);
 
-    return $tabs;
+	return $tabs;
 }
 add_filter('siteorigin_panels_widget_dialog_tabs', 'apt_add_widget_tabs', 20);
 
@@ -280,6 +281,119 @@ function apt_widget_init() {
 				$all_menu[$menu->slug] = $menu->name;
 			}
 			return $all_menu;
+		}
+	}
+
+	/**
+		in form_options array put this code
+
+		$this->get_woocommerce_posts_limit_key() => $this->get_woocommerce_posts_limit_value(),
+		$this->get_woocommerce_posts_key() => $this->get_woocommerce_posts_value(),
+		$this->get_siteorigin_posts_key() => $this->get_siteorigin_posts_value(),
+
+		in template file
+
+		$query_result = $this->get_posts($instance);
+		if ($query_result->have_posts()) { ?>
+			<div class="woocommerce">
+				<ul class="products">
+					<?php while($query_result->have_posts()) : $query_result->the_post(); ?>
+						<?php wc_get_template_part( 'content', 'product' ); ?>
+					<?php endwhile; ?>
+					<?php wp_reset_postdata(); ?>
+				</ul>
+			</div>
+		<?php } ?>
+	 */
+	abstract class APT_Widget_Woocommerce extends APT_Widget {
+		function form( $instance, $form_type = 'widget' ) {
+			/* Make sure that WooCommerce is installed */
+			if(class_exists('WooCommerce')) {
+				parent::form( $instance, $form_type );
+			} else {
+				?><div class="notice notice-error"><p><i class="fa fa-warning"></i> <?php _e('This widget requires WooCommerce', 'apt_widgets'); ?></p></div><?php
+			}
+		}
+		function widget( $args, $instance ) {
+			/* Make sure that WooCommerce is installed */
+			if(class_exists('WooCommerce')) {
+				parent::widget( $args, $instance );
+			} else {
+				?><div class="apt_notice"><i class="fa fa-warning"></i> <?php _e('This widget requires WooCommerce', 'apt_widgets'); ?></div><?php
+			}
+		}
+		protected function get_woocommerce_posts_limit_key() {
+			return "woocommerce_posts_limit";
+		}
+		protected function get_woocommerce_posts_limit_value() {
+			return array(
+						'type' => 'number',
+						'label' => __('How many products to show', 'apt_widgets'),
+						'default' => '6'
+					);
+		}
+		protected function get_woocommerce_posts_key() {
+			return "woocommerce_posts";
+		}
+		protected function get_woocommerce_posts_value() {
+			return array(
+						'type' => 'radio',
+						'label' => __( 'Filter Woocommerce Products', 'apt_widgets' ),
+						'default' => 'new',
+						'options' => array(
+							'new' => __( 'New Products', 'apt_widgets' ),
+							'featured' => __( 'Featuered Products', 'apt_widgets' ),
+							'best_seller' => __( 'Best Seller Products', 'apt_widgets' ),
+							'sale' => __( 'Sale Products', 'apt_widgets' ),
+							'custom' => __( 'Custom Products(by clicking button below)', 'apt_widgets' )
+						)
+					);
+		}
+		protected function get_siteorigin_posts_key() {
+			return "siteorigin_posts";
+		}
+		protected function get_siteorigin_posts_value() {
+			return array(
+					'type' => 'posts',
+					'label' => __('Custom Prodcuts', 'apt_widgets'),
+					'description' => __('If "Custom Products" is selected, this custom products will be used', 'apt_widgets')
+				);
+		}
+		protected function get_posts($instance)
+		{
+			// setup posts query
+			// if a user select from radio button
+			if (isset($instance["woocommerce_posts"]) && $instance["woocommerce_posts"] !== "custom") {
+				$posts_query = array();
+				$posts_query["post_type"] = "product";
+				$posts_query["posts_per_page"] = intval($instance["woocommerce_posts_limit"]);
+				// if a user select new products
+				if ($instance["woocommerce_posts"] === "new") {
+					return new WP_Query($posts_query);
+				}
+				// if a user select featured products
+				if ($instance["woocommerce_posts"] === "featured") {
+					$posts_query["meta_key"] = "_featured";
+					$posts_query["meta_value"] = "yes";
+					return new WP_Query($posts_query);
+				}
+				// if a user select best seller products
+				if ($instance["woocommerce_posts"] === "best_seller") {
+					$posts_query["meta_key"] = "total_sales";
+					$posts_query["orderby"] = "meta_value_num";
+					return new WP_Query($posts_query);
+				}
+				// if a user select sale products
+				if ($instance["woocommerce_posts"] === "sale") {
+					$posts_query["meta_key"] = "_sale_price";
+					$posts_query["meta_value"] = "0";
+					$posts_query["meta_compare"] = ">";
+					return new WP_Query($posts_query);
+				}
+			} else { // if a user select custom post(SiteOrigin post loop)
+				$posts_query = siteorigin_widget_post_selector_process_query( $instance['siteorigin_posts'] );
+				return new WP_Query($posts_query);
+			}
 		}
 	}
 }
